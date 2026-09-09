@@ -1,0 +1,46 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js build output
+/.next/
+/out/
+
+# Production
+/build
+
+# Environment variables & Local keys (CRITICAL SECURITY)
+.env
+.env*.local
+.env.production
+.env.development
+groovy-ceiling-*.json
+service-account*.json
+*.pem
+
+# Debug & logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Vercel deployment cache
+.vercel
+
+# Operating System files
+.DS_Store
+*.pem
+Thumbs.db
+
+# IDE configuration
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
