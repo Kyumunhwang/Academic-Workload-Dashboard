@@ -52,8 +52,14 @@ export function getWorkloadMap(eventsList, viewMode = VIEW_MODES.SINGLE) {
     dayObj.items.push(ev);
     dayObj.count += 1;
 
-    const grade = ev.resource?.grade || 'General';
-    dayObj.byGrade[grade] = (dayObj.byGrade[grade] || 0) + 1;
+    // Support multiple grades for an event (Leveled / Elective classes)
+    const eventGrades = ev.resource?.grades?.length
+      ? ev.resource.grades
+      : [ev.resource?.grade || 'General'];
+
+    eventGrades.forEach((grade) => {
+      dayObj.byGrade[grade] = (dayObj.byGrade[grade] || 0) + 1;
+    });
 
     if (viewMode === VIEW_MODES.ALL) {
       const overloaded = Object.entries(dayObj.byGrade)
@@ -213,16 +219,31 @@ export default function CalendarBoard() {
     const list =
       viewMode === VIEW_MODES.ALL
         ? events
-        : events.filter((item) => item.grade === selectedGrade);
+        : events.filter((item) => {
+            if (Array.isArray(item.grades) && item.grades.length > 0) {
+              return item.grades.includes(selectedGrade);
+            }
+            return item.grade === selectedGrade || item.rawGrade?.includes(selectedGrade);
+          });
 
     return list.map((item) => {
       const [year, month, day] = item.date.split('-').map(Number);
       const startDate = new Date(year, month - 1, day, 9, 0);
       const endDate = new Date(year, month - 1, day, 17, 0);
 
+      // Compact display prefix for multi-grades (e.g. [G7, G8])
+      let shortGrades = '';
+      if (Array.isArray(item.grades) && item.grades.length > 0) {
+        shortGrades = item.grades.map((g) => g.replace('Grade ', 'G')).join(', ');
+      } else if (item.grade) {
+        shortGrades = item.grade.replace(/Grade /g, 'G');
+      } else {
+        shortGrades = item.rawGrade || 'All';
+      }
+
       const gradePrefix =
         viewMode === VIEW_MODES.ALL
-          ? `[${item.grade?.replace('Grade ', 'G') || item.rawGrade || 'All'}] `
+          ? `[${shortGrades}] `
           : '';
 
       return {
@@ -486,7 +507,7 @@ export default function CalendarBoard() {
           }}
           popup
           tooltipAccessor={(event) =>
-            `Click to edit/delete: [${event.resource?.grade || 'All'} - ${event.resource?.subject}] ${event.resource?.type} - ${event.resource?.description || 'No details'}`
+            `Click to edit/delete: [${event.resource?.grades?.join(', ') || event.resource?.grade || 'All'} - ${event.resource?.subject}] ${event.resource?.type} - ${event.resource?.description || 'No details'}`
           }
           className="h-full font-sans"
         />
