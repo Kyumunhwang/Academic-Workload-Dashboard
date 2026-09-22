@@ -242,10 +242,8 @@ export default function CalendarBoard({ readOnly = false }) {
         shortGrades = item.rawGrade ? formatGradeShort(item.rawGrade) : 'All';
       }
 
-      const gradePrefix =
-        viewMode === VIEW_MODES.ALL
-          ? `[${shortGrades}] `
-          : '';
+      // Always show grade prefix (e.g. [M6], [M7, M8]) on all assignments in all views
+      const gradePrefix = shortGrades ? `[${shortGrades}] ` : '';
 
       return {
         id: item.id,
