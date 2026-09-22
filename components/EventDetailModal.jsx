@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Calendar as CalendarIcon, BookOpen, AlertTriangle, Trash2, Check, Loader2 } from 'lucide-react';
+import { X, Calendar as CalendarIcon, BookOpen, AlertTriangle, Trash2, Check, Loader2, GraduationCap } from 'lucide-react';
 import { AVAILABLE_GRADES } from '@/context/GradeContext';
-import { parseGrades } from '@/lib/gradeUtils';
+import { parseGrades, formatGradeShort } from '@/lib/gradeUtils';
 
 const TASK_TYPES = [
   { value: 'Homework', label: 'Homework (Blue)', colorClass: 'bg-blue-50 text-blue-700 border-blue-200' },
@@ -17,6 +17,7 @@ export default function EventDetailModal({
   onClose,
   onUpdate,
   onDelete,
+  readOnly = false,
 }) {
   const [formData, setFormData] = useState({
     date: '',
@@ -154,7 +155,7 @@ export default function EventDetailModal({
               {formData.type}
             </span>
             <h3 className="text-base font-bold text-slate-800">
-              {showConfirmDelete ? 'Confirm Deletion' : 'Edit Academic Schedule'}
+              {readOnly ? 'Academic Task Details' : showConfirmDelete ? 'Confirm Deletion' : 'Edit Academic Schedule'}
             </h3>
           </div>
           <button
@@ -173,9 +174,75 @@ export default function EventDetailModal({
           </div>
         )}
 
-        {/* Content Body */}
-        {showConfirmDelete ? (
-          /* Delete Confirmation View */
+        {/* Content Body: Read-Only View vs Teacher Edit/Delete View */}
+        {readOnly ? (
+          /* Student Read-Only View */
+          <div className="p-6 space-y-4">
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/80 space-y-3">
+              {/* Subject */}
+              <div className="flex items-start space-x-3">
+                <BookOpen className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Subject</span>
+                  <p className="text-base font-bold text-slate-900">{formData.subject || 'General'}</p>
+                </div>
+              </div>
+
+              {/* Scheduled Date */}
+              <div className="flex items-start space-x-3 pt-2 border-t border-slate-200/60">
+                <CalendarIcon className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Due / Scheduled Date</span>
+                  <p className="text-sm font-semibold text-slate-800">{formData.date}</p>
+                </div>
+              </div>
+
+              {/* Target Grades */}
+              <div className="flex items-start space-x-3 pt-2 border-t border-slate-200/60">
+                <GraduationCap className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target Grades</span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedGrades.length > 0 ? (
+                      selectedGrades.map((g) => (
+                        <span
+                          key={g}
+                          className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-xs font-semibold"
+                        >
+                          {formatGradeShort(g)} ({g})
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-slate-600 font-medium">{formData.grade || 'All Grades'}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Description / Instructions */}
+            <div>
+              <span className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
+                Assignment Scope & Details
+              </span>
+              <div className="p-3.5 bg-white border border-slate-200 rounded-xl min-h-[90px] text-xs sm:text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+                {formData.description || 'No detailed instructions provided.'}
+              </div>
+            </div>
+
+            {/* Read-Only Modal Action */}
+            <div className="flex items-center justify-end pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        ) : showConfirmDelete ? (
+          /* Delete Confirmation View (Teacher Only) */
           <div className="p-6 space-y-4">
             <div className="flex items-start space-x-3 p-4 bg-red-50/70 border border-red-200 rounded-xl text-slate-700">
               <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
@@ -236,7 +303,7 @@ export default function EventDetailModal({
             </div>
           </div>
         ) : (
-          /* Edit Form View */
+          /* Edit Form View (Teacher Only) */
           <form onSubmit={handleSave} className="p-6 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Task Type */}

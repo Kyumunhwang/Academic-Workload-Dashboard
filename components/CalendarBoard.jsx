@@ -6,6 +6,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale/en-US';
 import { useGrade, VIEW_MODES } from '@/context/GradeContext';
 import EventDetailModal from '@/components/EventDetailModal';
+import { formatGradeShort } from '@/lib/gradeUtils';
 import { CheckCircle2, AlertCircle, RefreshCw, Calendar as CalendarIcon, List } from 'lucide-react';
 
 const LOCAL_STORAGE_CACHE_KEY = 'academic_calendar_cache_v1';
@@ -77,7 +78,7 @@ export function getWorkloadMap(eventsList, viewMode = VIEW_MODES.SINGLE) {
   return map;
 }
 
-export default function CalendarBoard() {
+export default function CalendarBoard({ readOnly = false }) {
   const [mounted, setMounted] = useState(false);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -231,14 +232,14 @@ export default function CalendarBoard() {
       const startDate = new Date(year, month - 1, day, 9, 0);
       const endDate = new Date(year, month - 1, day, 17, 0);
 
-      // Compact display prefix for multi-grades (e.g. [G7, G8])
+      // Compact display prefix for multi-grades (e.g. [M6, M7], [H9, H10])
       let shortGrades = '';
       if (Array.isArray(item.grades) && item.grades.length > 0) {
-        shortGrades = item.grades.map((g) => g.replace('Grade ', 'G')).join(', ');
+        shortGrades = item.grades.map(formatGradeShort).join(', ');
       } else if (item.grade) {
-        shortGrades = item.grade.replace(/Grade /g, 'G');
+        shortGrades = item.grade.split(',').map((s) => formatGradeShort(s.trim())).join(', ');
       } else {
-        shortGrades = item.rawGrade || 'All';
+        shortGrades = item.rawGrade ? formatGradeShort(item.rawGrade) : 'All';
       }
 
       const gradePrefix =
@@ -338,7 +339,7 @@ export default function CalendarBoard() {
 
       let alertText = `Overload (${dayWorkload?.count})`;
       if (viewMode === VIEW_MODES.ALL && dayWorkload?.overloadedGrades?.length) {
-        alertText = `Overload (${dayWorkload.overloadedGrades.map((g) => g.replace('Grade ', 'G')).join(', ')})`;
+        alertText = `Overload (${dayWorkload.overloadedGrades.map(formatGradeShort).join(', ')})`;
       }
 
       return (
@@ -506,17 +507,22 @@ export default function CalendarBoard() {
             },
           }}
           popup
-          tooltipAccessor={(event) =>
-            `Click to edit/delete: [${event.resource?.grades?.join(', ') || event.resource?.grade || 'All'} - ${event.resource?.subject}] ${event.resource?.type} - ${event.resource?.description || 'No details'}`
-          }
+          tooltipAccessor={(event) => {
+            const gradesStr = event.resource?.grades?.length
+              ? event.resource.grades.map(formatGradeShort).join(', ')
+              : (event.resource?.grade ? formatGradeShort(event.resource.grade) : 'All');
+            const actionText = readOnly ? 'Click to view details' : 'Click to edit/delete';
+            return `${actionText}: [${gradesStr} - ${event.resource?.subject}] ${event.resource?.type} - ${event.resource?.description || 'No details'}`;
+          }}
           className="h-full font-sans"
         />
       </div>
 
-      {/* Event Edit / Delete Modal */}
+      {/* Event Edit / Delete / Read-Only Modal */}
       <EventDetailModal
         isOpen={isModalOpen}
         event={selectedEvent}
+        readOnly={readOnly}
         onClose={() => {
           setIsModalOpen(false);
           setSelectedEvent(null);

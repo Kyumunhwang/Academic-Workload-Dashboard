@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { useGrade, VIEW_MODES } from '@/context/GradeContext';
-import { Layers, RefreshCw, ExternalLink } from 'lucide-react';
+import { Layers, RefreshCw, ExternalLink, GraduationCap } from 'lucide-react';
 
-export default function GradeSelector() {
+export default function GradeSelector({ variant = 'teacher' }) {
   const {
     viewMode,
     setViewMode,
@@ -13,6 +13,8 @@ export default function GradeSelector() {
     selectGradeAndMode,
     availableGrades,
   } = useGrade();
+
+  const isStudent = variant === 'student';
 
   return (
     <header className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2">
@@ -26,27 +28,45 @@ export default function GradeSelector() {
                 alt="Lighthouse International School Logo"
                 className="w-8 h-8 sm:w-9 sm:h-9 object-contain flex-shrink-0 rounded-full shadow-sm border border-slate-100"
               />
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                Academic Workload Dashboard
-              </h1>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                    {isStudent ? 'Student Academic Calendar' : 'Academic Workload Dashboard'}
+                  </h1>
+                  {isStudent && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full border border-blue-200">
+                      <GraduationCap className="w-3 h-3" />
+                      <span>Student View</span>
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
-              {viewMode === VIEW_MODES.SINGLE ? (
-                `Focused view for ${selectedGrade} with daily overload detection (3+ assignments/day)`
+            <p className="text-sm text-slate-500 mt-1">
+              {isStudent ? (
+                viewMode === VIEW_MODES.SINGLE ? (
+                  <span>Showing assignments, projects, and exam schedules for <strong className="text-blue-700">{selectedGrade}</strong></span>
+                ) : (
+                  <span>Showing combined schedule for all grades</span>
+                )
               ) : (
-                <span className="inline-flex items-center gap-1.5 flex-wrap">
-                  <span>Submit task entries via Google Form:</span>
-                  <a
-                    href="https://docs.google.com/forms/d/e/1FAIpQLSdJQLxb6N4uMpu28B4Tc3iiyh0dMQZq1Lo_5nB0LV7aR-sc1g/viewform?usp=header"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center font-semibold text-blue-600 hover:text-blue-800 hover:underline gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 transition text-xs"
-                    title="Open Google Form for new entries"
-                  >
-                    <span>Google Form Submission Link</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </span>
+                viewMode === VIEW_MODES.SINGLE ? (
+                  `Focused view for ${selectedGrade} with daily overload detection (3+ assignments/day)`
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 flex-wrap">
+                    <span>Submit task entries via Google Form:</span>
+                    <a
+                      href="https://docs.google.com/forms/d/e/1FAIpQLSdJQLxb6N4uMpu28B4Tc3iiyh0dMQZq1Lo_5nB0LV7aR-sc1g/viewform?usp=header"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center font-semibold text-blue-600 hover:text-blue-800 hover:underline gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 transition text-xs"
+                      title="Open Google Form for new entries"
+                    >
+                      <span>Google Form Submission Link</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </span>
+                )
               )}
             </p>
           </div>
@@ -55,7 +75,7 @@ export default function GradeSelector() {
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full md:w-auto">
             <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg border border-slate-200 flex-1 sm:flex-initial">
               <label htmlFor="grade-select" className="text-xs sm:text-sm font-semibold text-slate-700 whitespace-nowrap">
-                Grade Filter:
+                Grade:
               </label>
               <select
                 id="grade-select"
@@ -75,6 +95,21 @@ export default function GradeSelector() {
                 </optgroup>
               </select>
             </div>
+
+            {/* Student View Link (Teachers Only) */}
+            {!isStudent && (
+              <a
+                href="/student"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center space-x-1.5 px-3 py-2 border border-blue-200 shadow-sm text-xs font-semibold rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition"
+                title="Open Student Calendar view in new tab"
+              >
+                <GraduationCap className="w-4 h-4 text-blue-600" />
+                <span className="hidden sm:inline">Student View</span>
+                <ExternalLink className="w-3 h-3 text-blue-400" />
+              </a>
+            )}
 
             {/* Refresh Button */}
             <button
@@ -106,7 +141,7 @@ export default function GradeSelector() {
             <span>All Classes</span>
           </button>
 
-          {/* Individual Grade Buttons */}
+          {/* Individual Grade Buttons (Showing M6-M8, H9-H12 short codes) */}
           {availableGrades.map((grade) => {
             const isSelected = viewMode === VIEW_MODES.SINGLE && grade.value === selectedGrade;
             return (
