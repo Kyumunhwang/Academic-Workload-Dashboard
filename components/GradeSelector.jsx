@@ -50,23 +50,19 @@ export default function GradeSelector({ variant = 'teacher' }) {
                   <span>Showing combined schedule for all grades</span>
                 )
               ) : (
-                viewMode === VIEW_MODES.SINGLE ? (
-                  `Focused view for ${selectedGrade} with daily overload detection (3+ assignments/day)`
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 flex-wrap">
-                    <span>Submit task entries via Google Form:</span>
-                    <a
-                      href="https://docs.google.com/forms/d/e/1FAIpQLSdJQLxb6N4uMpu28B4Tc3iiyh0dMQZq1Lo_5nB0LV7aR-sc1g/viewform?usp=header"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center font-semibold text-blue-600 hover:text-blue-800 hover:underline gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 transition text-xs"
-                      title="Open Google Form for new entries"
-                    >
-                      <span>Google Form Submission Link</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </span>
-                )
+                <span className="inline-flex items-center gap-1.5 flex-wrap">
+                  <span>Submit task entries via Google Form:</span>
+                  <a
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSdJQLxb6N4uMpu28B4Tc3iiyh0dMQZq1Lo_5nB0LV7aR-sc1g/viewform?usp=header"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center font-semibold text-blue-600 hover:text-blue-800 hover:underline gap-1 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 transition text-xs"
+                    title="Open Google Form for new entries"
+                  >
+                    <span>Google Form Submission Link</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </span>
               )}
             </p>
           </div>
